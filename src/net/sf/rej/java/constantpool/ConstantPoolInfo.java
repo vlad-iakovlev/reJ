@@ -43,6 +43,10 @@ public abstract class ConstantPoolInfo {
     public static final int DOUBLE = 6;
     public static final int NAME_AND_TYPE = 12;
     public static final int UTF8 = 1;
+    public static final int METHOD_HANDLE = 15;
+    public static final int METHOD_TYPE = 16;
+    public static final int DYNAMIC = 17;
+    public static final int INVOKE_DYNAMIC = 18;
 
     private int tag;
 
@@ -96,6 +100,18 @@ public abstract class ConstantPoolInfo {
             int length = parser.getShortAsInt();
             byte[] bytes = parser.getBytes(length);
             return new UTF8Info(bytes, pool);
+        case METHOD_HANDLE:
+            int referenceKind = parser.getByteAsInt();
+            int referenceIndex = parser.getShortAsInt();
+            return new MethodHandleInfo(referenceKind, referenceIndex, pool);
+        case METHOD_TYPE:
+            int methodTypeIndex = parser.getShortAsInt();
+            return new MethodTypeInfo(methodTypeIndex, pool);
+        case DYNAMIC:
+        case INVOKE_DYNAMIC:
+            int bootstrapMethodAttrIndex = parser.getShortAsInt();
+            int nameAndTypeIndex2 = parser.getShortAsInt();
+            return new DynamicInfo(tag, bootstrapMethodAttrIndex, nameAndTypeIndex2, pool);
         default:
             byte[] asdf = parser.getBytes(32);
         	logger.warning("Unsupported/invalid constantpool entry: " + tag);
